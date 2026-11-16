@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Matemáticas con Victoria</title>
+<style>
+:root{--bg:#f4f7ff;--card:#fff;--tx:#1d2340;--ac:#3b5bdb;--ok:#2b9348;--bad:#d62839;--st:#eef2ff;--bd:#d5dcf5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12162b;--card:#1c2240;--tx:#eef0ff;--ac:#8ea2ff;--ok:#5ad17f;--bad:#ff7b88;--st:#252d54;--bd:#38427a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12162b;--card:#1c2240;--tx:#eef0ff;--ac:#8ea2ff;--ok:#5ad17f;--bad:#ff7b88;--st:#252d54;--bd:#38427a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:18px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:760px;margin:auto;padding:12px}
+h1{font-size:1.5em;margin:.3em 0}h2{font-size:1.25em}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+nav button,.b{font:inherit;border:0;border-radius:12px;padding:10px 14px;background:var(--st);color:var(--tx);cursor:pointer}
+nav button.on,.b.p{background:var(--ac);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:10px 0}
+.step{background:var(--st);border-left:5px solid var(--ac);border-radius:10px;padding:8px 12px;margin:8px 0}
+.q{font-size:1.2em;font-weight:600}
+input{font:inherit;padding:10px;border-radius:10px;border:2px solid var(--bd);width:9em;background:var(--bg);color:var(--tx)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.ok{color:var(--ok);font-weight:700}.no{color:var(--bad);font-weight:700}
+details summary{cursor:pointer;font-weight:600}
+.tb{overflow-x:auto}table{border-collapse:collapse}td,th{border:1px solid var(--bd);padding:4px 8px;text-align:center}
+</style></head><body><main>
+<h1>🧮 Matemáticas con Victoria</h1>
+<nav id="nav"></nav><div id="v"></div>
+<script>
+const $=s=>document.querySelector(s),sh=a=>[...a].sort(()=>Math.random()-.5),pick=a=>a[Math.floor(Math.random()*a.length)];
+const U={L:{km:1000,hm:100,dam:10,m:1,dm:.1,cm:.01,mm:.001},M:{kg:1000,hg:100,dag:10,g:1,dg:.1,cg:.01,mg:.001},T:{h:3600,min:60,s:1}};
+const typ=u=>Object.keys(U).find(k=>u in U[k]);
+const fmt=n=>(+n.toPrecision(12)).toLocaleString('en-US',{maximumFractionDigits:9}).replace(/,/g,' ').replace('.',',');
+const sup=p=>p==2?'²':p==3?'³':'';
+function conv(v,a,b,p=1,vt){
+ const t=typ(a),base=U[t][a]/U[t][b],f=+(base**p).toPrecision(12),A=a+sup(p),B=b+sup(p),vs=vt||fmt(v);
+ const S=[`Qué tenemos y qué queremos: pasar <b>${vs} ${A}</b> a <b>${B}</b>.`];
+ if(vt)S.push(`Primero convertimos la fracción a número: ${vt} = <b>${fmt(v)}</b>.`);
+ S.push(`Buscamos la equivalencia: <b>1 ${a} = ${fmt(base)} ${b}</b>.`);
+ if(p>1)S.push(`Como es ${p==2?'área':'volumen'}, elevamos la equivalencia a la ${p}: (${fmt(base)})${sup(p)} = ${fmt(f)}. Entonces <b>1 ${A} = ${fmt(f)} ${B}</b>.`);
+ S.push(f>=1?`${B} es una unidad más <b>pequeña</b>, así que el número crece: <b>MULTIPLICAMOS</b>. ${fmt(v)} × ${fmt(f)}`:`${B} es una unidad más <b>grande</b>, así que el número se hace menor: <b>DIVIDIMOS</b>. ${fmt(v)} ÷ ${fmt(1/f)}`);
+ const r=+(v*f).toPrecision(12);S.push(`Resultado: <b>${vs} ${A} = ${fmt(r)} ${B}</b> ✅`);
+ return{text:`Convierte: <b>${vs} ${A}</b> a <b>${B}</b>`,kind:'num',ans:r,steps:S,show:`${fmt(r)} ${B}`};
+}
+const D=[
+{p:'a',eq:'f = 3x²·m·n²',v:'m',steps:['m está <b>multiplicando</b> junto con 3, x² y n².','Para dejar m sola, el grupo 3x²n² pasa al otro lado a <b>dividir</b>.','Resultado: <b>m = f / (3x²n²)</b>'],ans:'m = f / (3x²n²)',wrong:['m = f · 3x²n²','m = 3x²n² / f','m = f − 3x²n²']},
+{x:1,eq:'f = 3x²·m·n²',v:'n',steps:['n² está multiplicando; pasamos 3x²·m a dividir: n² = f / (3x²m).','Para quitar el exponente 2 usamos la <b>raíz cuadrada</b> en los dos lados.','Resultado: <b>n = √( f / (3x²m) )</b>'],ans:'n = √( f / (3x²m) )',wrong:['n = f / (3x²m)','n = ( f / (3x²m) )²','n = √f − 3x²m']},
+{p:'b',eq:'a = (V − S) / t',v:'S',steps:['t está <b>dividiendo</b> a todo el lado derecho: pasa a multiplicar → a·t = V − S.','S está restando: la pasamos a la izquierda y a·t a la derecha → S = V − a·t.','Resultado: <b>S = V − a·t</b>'],ans:'S = V − a·t',wrong:['S = V + a·t','S = a·t − V','S = (V − a) / t']},
+{p:'c',eq:'A = B · (K − S)',v:'K',steps:['B <b>multiplica</b> al paréntesis: pasa a dividir → A / B = K − S.','S está restando: pasa a <b>sumar</b> → K = A / B + S.','Resultado: <b>K = A/B + S</b>'],ans:'K = A/B + S',wrong:['K = A/B − S','K = A·B + S','K = B/A + S']},
+{p:'d',eq:'L = L₀ · [ 1 + K · (T − T₀) ]',v:'T',steps:['L₀ multiplica al corchete: pasa a dividir → L/L₀ = 1 + K(T − T₀).','El 1 está sumando: pasa a restar → L/L₀ − 1 = K(T − T₀).','K multiplica al paréntesis: pasa a dividir → (L/L₀ − 1)/K = T − T₀.','T₀ está restando: pasa a sumar.','Resultado: <b>T = (L/L₀ − 1)/K + T₀</b>'],ans:'T = (L/L₀ − 1)/K + T₀',wrong:['T = (L/L₀ + 1)/K + T₀','T = (L/L₀ − 1)·K + T₀','T = (L/L₀ − 1)/K − T₀']},
+{x:1,eq:'v = d / t',v:'d',steps:['t está dividiendo: pasa a multiplicar.','Resultado: <b>d = v · t</b>'],ans:'d = v · t',wrong:['d = v / t','d = t / v','d = v + t']},
+{x:1,eq:'F = m · a',v:'a',steps:['m está multiplicando: pasa a dividir.','Resultado: <b>a = F / m</b>'],ans:'a = F / m',wrong:['a = F · m','a = m / F','a = F − m']},
+{x:1,eq:'V = π · r² · h',v:'h',steps:['π, r² y h se multiplican. Para dejar h sola, pasamos π·r² a dividir.','Resultado: <b>h = V / (π·r²)</b>'],ans:'h = V / (π·r²)',wrong:['h = V · π·r²','h = π·r² / V','h = V − π·r²']},
+{x:1,eq:'P = 2(b + h)',v:'b',steps:['El 2 multiplica al paréntesis: pasa a dividir → P/2 = b + h.','h está sumando: pasa a restar.','Resultado: <b>b = P/2 − h</b>'],ans:'b = P/2 − h',wrong:['b = P/2 + h','b = 2P − h','b = P − 2h']}];
+const des=d=>({text:`Despeja <b>${d.v}</b> en: <b>${d.eq}</b>`,kind:'mc',ans:d.ans,opts:sh([d.ans,...d.wrong]),steps:d.steps,show:d.ans});
+const PH=[[140,'min','s'],[.5,'h','s','2/4'],[20,'km','m'],[15,'cm','mm'],[5,'kg','g'],[10,'g','dag']],PA=[[100,'mm','m',2],[20,'m','cm',3],[40,'m','cm',2]];
+function mkConv(){const t=pick(['L','L','M','T','A','V']);let a,b,v,p=1;
+ if(t=='T'){[a,b]=sh(['h','min','s']).slice(0,2);v=pick([2,3,5,10,12,30])}
+ else{const k=t=='M'?'M':'L';[a,b]=sh(Object.keys(U[k])).slice(0,2);v=pick([2,5,8,15,20,40,50,100,250]);if(t=='A')p=2;if(t=='V')p=3}
+ return conv(v,a,b,p)}
+const mkDes=()=>des(pick(D));
+function stepper(S){const w=document.createElement('div'),l=document.createElement('div'),b=document.createElement('button');let i=0;b.className='b p';b.textContent='Mostrar paso 1 ▶';
+ b.onclick=()=>{const d=document.createElement('div');d.className='step';d.innerHTML=`<b>Paso ${i+1}.</b> ${S[i]}`;l.appendChild(d);i++;b.textContent=i<S.length?`Mostrar paso ${i+1} ▶`:'✅ ¡Completo!';if(i>=S.length)b.disabled=true};w.append(l,b);return w}
+function renderQ(q,h,cb,fb){h.innerHTML=`<p class="q">${q.text}</p>`;const m=document.createElement('div');let done=0;
+ const fin=ok=>{if(done)return;done=1;if(fb){m.innerHTML=ok?'<p class="ok">🎉 ¡Muy bien, Victoria!</p>':`<p class="no">Casi. La respuesta es <b>${q.show}</b>. Mira cómo se resuelve:</p>`;if(!ok)m.appendChild(stepper(q.steps));h.querySelectorAll('button,input').forEach(x=>x.disabled=true)}cb&&cb(ok)};
+ if(q.kind=='num'){const i=document.createElement('input'),b=document.createElement('button');i.inputMode='decimal';i.placeholder='Tu respuesta';b.className='b p';b.textContent='Comprobar';
+  b.onclick=()=>{const x=parseFloat(i.value.replace(/\s/g,'').replace(',','.'));if(isNaN(x))return;fin(Math.abs(x-q.ans)<=1e-6*Math.max(1,Math.abs(q.ans)))};h.append(i,' ',b)}
+ else q.opts.forEach(o=>{const b=document.createElement('button');b.className='b opt';b.textContent=o;b.onclick=()=>fin(o==q.ans);h.append(b)});
+ h.append(m)}
+const views={
+inicio(){return `<div class="card"><h2>¡Hola, Victoria! 👋</h2><p>Soy tu tutor de matemáticas. Hoy aprenderás a <b>convertir unidades</b> (tiempo, longitud, masa, área y volumen) y a <b>despejar letras</b> en fórmulas. Te explicaré <b>paso a paso</b>, ¡sin prisa!</p><button class="b p" onclick="hi()">🔊 Escuchar saludo</button></div>
+<div class="card"><h2>📌 Recuerda</h2><p>Longitud: <b>km · hm · dam · m · dm · cm · mm</b>. Cada escalón vale <b>×10</b> (o ÷10).<br>Masa: <b>kg · hg · dag · g · dg · cg · mg</b>, igual.</p>
+<div class="tb"><table><tr><th>Medida</th><th>Cada escalón</th></tr><tr><td>Longitud / masa</td><td>10</td></tr><tr><td>Área (m², cm²…)</td><td>10² = 100</td></tr><tr><td>Volumen (m³, cm³…)</td><td>10³ = 1 000</td></tr></table></div>
+<p>Tiempo: <b>1 h = 60 min</b> y <b>1 min = 60 s</b> (1 h = 3 600 s).<br>Despejar: lo que <b>multiplica</b> pasa a <b>dividir</b>; lo que <b>suma</b> pasa a <b>restar</b>, y al revés.</p></div>`},
+foto(){const h=document.createElement('div');const add=(t,list)=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h2>${t}</h2>`;list.forEach(([title,q],i)=>{const d=document.createElement('details');d.innerHTML=`<summary>${title}</summary><p>${q.text}</p>`;d.appendChild(stepper(q.steps));c.appendChild(d)});h.appendChild(c)};
+ add('1️⃣ Convierte (tiempo, longitud, masa)',PH.map((x,i)=>{const q=conv(x[0],x[1],x[2],1,x[3]);return[`${'abcdef'[i]}) ${x[3]||fmt(x[0])} ${x[1]} a ${x[2]}`,q]}));
+ add('2️⃣ Convierte (área y volumen)',PA.map((x,i)=>[`${'abc'[i]}) ${fmt(x[0])} ${x[1]}${sup(x[3])} a ${x[2]}${sup(x[3])}`,conv(...x)]));
+ add('3️⃣ Despeja la letra señalada',D.filter(d=>d.p||d.x==1&&d.v=='n').map(d=>[`${d.p?d.p+') ':'(extra) '}${d.eq} → ${d.v}`,des(d)]));return h},
+prac(){const h=document.createElement('div');h.innerHTML='<div class="card"><p>Elige qué practicar:</p><button class="b p" id="pc">Conversiones</button> <button class="b" id="pd">Despejes</button></div><div class="card" id="pq"></div><button class="b p" id="nx">Otro ejercicio ➜</button>';let mk=mkConv;
+ const go=()=>renderQ(mk(),h.querySelector('#pq'),null,true);h.querySelector('#pc').onclick=()=>{mk=mkConv;go()};h.querySelector('#pd').onclick=()=>{mk=mkDes;go()};h.querySelector('#nx').onclick=go;setTimeout(go);return h},
+exam(){const h=document.createElement('div'),N=10;let Q,i,sc,R;
+ const start=()=>{Q=[...Array(6)].map(mkConv).concat(sh(D).slice(0,4).map(des));Q=sh(Q);i=0;sc=0;R=[];next()};
+ const next=()=>{if(i>=N){const m=sc>=9?'🏆 ¡Excelente!':sc>=7?'🌟 ¡Muy bien!':sc>=5?'👍 Vas bien, repasa un poco':'💪 ¡Sigue practicando, tú puedes!';h.innerHTML=`<div class="card"><h2>Examen terminado</h2><p class="q">Victoria, sacaste ${sc} de ${N}. ${m}</p><button class="b p" id="re">Repetir examen</button></div>`;R.forEach((r,k)=>{if(!r.ok){const c=document.createElement('div');c.className='card';c.innerHTML=`<p><span class="no">✘ Pregunta ${k+1}:</span> ${r.q.text}<br>Respuesta correcta: <b>${r.q.show}</b></p>`;c.appendChild(stepper(r.q.steps));h.appendChild(c)}});h.querySelector('#re').onclick=start;return}
+  h.innerHTML=`<div class="card"><p>Pregunta ${i+1} de ${N}</p><div id="eq"></div></div>`;const q=Q[i];renderQ(q,h.querySelector('#eq'),ok=>{if(ok)sc++;R.push({q,ok});i++;setTimeout(next,350)},false)};
+ h.innerHTML='<div class="card"><h2>📝 Examen</h2><p>10 preguntas mezcladas. Al final verás tu nota y la solución paso a paso de lo que falles.</p><button class="b p" id="go">Empezar</button></div>';h.querySelector('#go').onclick=start;return h}};
+const tabs=[['inicio','🏠 Inicio'],['foto','📘 Ejercicios resueltos'],['prac','✏️ Practicar'],['exam','📝 Examen']];
+function show(k){$('#nav').innerHTML='';tabs.forEach(([id,t])=>{const b=document.createElement('button');b.textContent=t;b.className=id==k?'on':'';b.onclick=()=>show(id);$('#nav').append(b)});const r=views[k](),v=$('#v');typeof r=='string'?v.innerHTML=r:(v.innerHTML='',v.append(r))}
+function hi(){try{const u=new SpeechSynthesisUtterance('Hola Victoria. Bienvenida. Hoy vamos a aprender a convertir unidades y a despejar letras, paso a paso.');u.lang='es-ES';speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+show('inicio');
+</script></main></body></html>
